@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "steam-console"
+version = "0.1.0"
+description = "Run the desktop Steam in Big Picture under a fullscreen gamescope, like a real console"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff"]
+
+[project.scripts]
+steam-console = "steam_console.cli:main"
+consola-steam = "steam_console.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

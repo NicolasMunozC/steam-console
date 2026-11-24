@@ -55,12 +55,16 @@ $ steam-console
 ```
 
 `steam-console` and `consola-steam` are the same command, and the installer adds
-a **Steam Console (Consola Steam)** entry to your application menu.
+a **Steam Console (Consola Steam)** entry with its own icon to
+`~/.local/share/applications` — the standard XDG location, so it shows up in the
+SUPER launcher on Hyprland and in the application menu on any other desktop,
+and it behaves like any other app: no terminal window, no path to remember.
 
 | Option | Effect |
 |---|---|
 | `--prefix DIR` | install under `DIR` instead of `~/.local` |
 | `--no-desktop` | skip the menu entry |
+| `--terminal` | run the entry in a terminal (`Terminal=true`) |
 | `--dry-run` | print what it would do |
 | `--uninstall` | remove the modules, the launchers and the menu entry |
 
@@ -93,6 +97,18 @@ $ steam-console --steam-flags "-gamepadui -noreactlogin"
 ```
 
 Exit by closing Big Picture (Steam exits, gamescope follows) or with Ctrl+C.
+
+## Running it like an app
+
+`steam-console` from a terminal stays the honest way to run it, and the only way
+to see its output. The installed entry is for the couch: pick it from the
+launcher, Big Picture opens fullscreen, close Big Picture to leave.
+
+The entry uses `Terminal=false` on purpose — a launcher with no terminal
+configured would otherwise start nothing at all. The trade is that there is no
+Ctrl+C to fall back on if gamescope wedges; install with `--terminal` if you want
+that escape hatch, or run the command again from a terminal and use it there.
+`pkill gamescope` clears a wedged session either way.
 
 ## How the mode is chosen
 

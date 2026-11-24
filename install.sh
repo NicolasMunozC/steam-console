@@ -6,7 +6,7 @@
 # standard library plus the gamescope and steam already on the machine.
 #
 # Usage:
-#   ./install.sh [--prefix DIR] [--no-desktop] [--uninstall] [--dry-run]
+#   ./install.sh [--prefix DIR] [--no-desktop] [--terminal] [--uninstall] [--dry-run]
 #   curl -fsSL https://raw.githubusercontent.com/NicolasMunozC/steam-console/main/install.sh | sh
 set -eu
 
@@ -15,6 +15,7 @@ REPO="https://github.com/NicolasMunozC/steam-console"
 BRANCH="main"
 
 WITH_DESKTOP=1
+WITH_TERMINAL=0
 UNINSTALL=0
 DRY=0
 TMP=""
@@ -36,9 +37,10 @@ while [ $# -gt 0 ]; do
                       PREFIX="$2"; shift 2 ;;
         --prefix=*)   PREFIX="${1#--prefix=}"; shift ;;
         --no-desktop) WITH_DESKTOP=0; shift ;;
+        --terminal)   WITH_TERMINAL=1; shift ;;
         --uninstall)  UNINSTALL=1; shift ;;
         --dry-run)    DRY=1; shift ;;
-        -h|--help)    sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        -h|--help)    sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
         *)            fail "unknown option: $1 (try --help)" ;;
     esac
 done
@@ -47,11 +49,13 @@ BINDIR="$PREFIX/bin"
 APPDIR="$PREFIX/share/applications"
 LIBDIR="$PREFIX/share/steam-console"
 ENTRY="$APPDIR/steam-console.desktop"
+ICONDIR="$PREFIX/share/icons/hicolor/scalable/apps"
+ICON="$ICONDIR/steam-console.svg"
 
 if [ "$UNINSTALL" = 1 ]; then
     say "Removing $LIBDIR, the launchers and the menu entry"
     do_it rm -rf "$LIBDIR"
-    do_it rm -f "$BINDIR/steam-console" "$BINDIR/consola-steam" "$ENTRY"
+    do_it rm -f "$BINDIR/steam-console" "$BINDIR/consola-steam" "$ENTRY" "$ICON"
     say "Done."
     exit 0
 fi
@@ -116,11 +120,18 @@ EOF
 fi
 
 if [ "$WITH_DESKTOP" = 1 ]; then
-    say "Adding the menu entry"
-    do_it mkdir -p "$APPDIR"
+    say "Adding the menu entry and its icon"
+    do_it mkdir -p "$APPDIR" "$ICONDIR"
     if [ "$DRY" = 1 ]; then
         say "  would: write $ENTRY"
+        say "  would: write $ICON"
     else
+        cp "$SRC/assets/steam-console.svg" "$ICON"
+
+        # Terminal=false is what makes it behave like an app: a launcher that
+        # has no terminal configured would otherwise run nothing at all.
+        # --terminal keeps Ctrl+C available as a way out of a hung gamescope.
+        if [ "$WITH_TERMINAL" = 1 ]; then TERMINAL=true; else TERMINAL=false; fi
         cat > "$ENTRY" <<EOF
 [Desktop Entry]
 Type=Application
@@ -128,13 +139,20 @@ Name=Steam Console (Consola Steam)
 GenericName=Console-mode Steam
 Comment=Big Picture under fullscreen gamescope, using this machine's Steam
 Exec=$BINDIR/steam-console
-Icon=steam
-Terminal=true
+Icon=steam-console
+Terminal=$TERMINAL
 Categories=Game;
 Keywords=steam;bigpicture;big picture;gamescope;console;consola;
 EOF
+
+        if command -v desktop-file-validate >/dev/null 2>&1; then
+            desktop-file-validate "$ENTRY" || fail "the desktop entry is invalid"
+        fi
         if command -v update-desktop-database >/dev/null 2>&1; then
             update-desktop-database "$APPDIR" >/dev/null 2>&1 || true
+        fi
+        if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+            gtk-update-icon-cache -f -t "$PREFIX/share/icons/hicolor" >/dev/null 2>&1 || true
         fi
     fi
 fi
@@ -145,7 +163,8 @@ say ""
 say "Installed. Run it with: steam-console"
 say "Preview the exact gamescope command with: steam-console --print-only"
 if [ "$WITH_DESKTOP" = 1 ]; then
-    say 'Or start it from the application menu: "Steam Console (Consola Steam)"'
+    say 'Or find it in your launcher (SUPER on Hyprland, the app menu elsewhere):'
+    say '  "Steam Console (Consola Steam)"'
 fi
 
 case ":${PATH}:" in

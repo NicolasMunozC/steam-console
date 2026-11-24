@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Steam Console">
+  <rect x="2" y="2" width="60" height="60" rx="15" fill="#1f2430"/>
+  <rect x="2" y="2" width="60" height="60" rx="15" fill="none" stroke="#2f3850" stroke-width="1.5"/>
+  <rect x="12" y="23" width="40" height="21" rx="10.5" fill="#eef1f7"/>
+  <circle cx="23.5" cy="33.5" r="5.2" fill="#1f2430"/>
+  <circle cx="40.5" cy="33.5" r="5.2" fill="#1f2430"/>
+  <rect x="28.5" y="31.5" width="7" height="4" rx="2" fill="#1f2430" opacity="0.55"/>
+</svg>

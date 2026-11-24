@@ -7,8 +7,23 @@ name = "steam-console"
 version = "0.1.0"
 description = "Run the desktop Steam in Big Picture under a fullscreen gamescope, like a real console"
 readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "NicolasMunozC" }]
+keywords = ["steam", "big-picture", "gamescope", "console", "linux", "gamepad"]
 requires-python = ">=3.11"
 dependencies = []
+classifiers = [
+    "Environment :: Console",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Topic :: Games/Entertainment",
+]
+
+[project.urls]
+Homepage = "https://github.com/NicolasMunozC/steam-console"
+Repository = "https://github.com/NicolasMunozC/steam-console"
+Issues = "https://github.com/NicolasMunozC/steam-console/issues"
 
 [project.optional-dependencies]
 dev = ["pytest", "ruff"]

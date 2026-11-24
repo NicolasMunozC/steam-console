@@ -91,8 +91,9 @@ are the ones that session needs too.
 
 ## Flag parity
 
-The gamescope line mirrors podstage's `containers/runtime/runner.sh`, the line a
-podstage streaming session uses. Keeping the two in step is deliberate: it is
+The gamescope line mirrors
+[podstage](https://github.com/slooock-dev/podstage)'s
+`containers/runtime/runner.sh`, the line a podstage streaming session uses. Keeping the two in step is deliberate: it is
 where the `-e` overlay behaviour, `--force-windows-fullscreen` and
 `--expose-wayland` were proven. If upstream changes that line, change this one.
 

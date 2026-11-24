@@ -102,6 +102,22 @@ $ gamescope --backend wayland -W 3440 -H 1440 -w 3440 -h 1440 -r 180 \
     -C 3000 --expose-wayland --force-windows-fullscreen -e -f -- steam -gamepadui
 ```
 
+## Attribution
+
+Steam Console is by **NicolasMunozC** — https://github.com/NicolasMunozC/steam-console
+
+Use it, fork it, embed it, ship it: it is MIT licensed and meant to be used.
+
+If you do, credit the original author by name with a link to this repository and
+keep the `LICENSE` and `NOTICE` files. The MIT License already requires the
+copyright notice to travel with every copy and every substantial portion of the
+code, so a fork that rebrands the project still has to keep it — and a fork must
+not present this work as its own.
+
+The licence can grant that; it cannot make a fork advertise you in its own UI.
+If you need that promise from downstream users, ask before forking — it is
+cheaper than a custom licence nobody will adopt.
+
 ## Tests
 
 ```console

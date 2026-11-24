@@ -21,6 +21,9 @@ def build_parser() -> argparse.ArgumentParser:
                         "monitor's current mode)")
     p.add_argument("--steam-flags", default=STEAM_FLAGS, metavar="FLAGS",
                    help=f"Steam launch flags (default: {STEAM_FLAGS})")
+    p.add_argument("--steamos", action="store_true",
+                   help="run Steam as a Deck: the power menu's 'Switch to "
+                        "desktop' works, and Steam powers Bluetooth off")
     p.add_argument("--keep-steam", action="store_true",
                    help="do not close Steam first (it must not be running)")
     p.add_argument("--print-only", action="store_true",
@@ -34,7 +37,8 @@ def main(argv: list[str] | None = None) -> int:
         return launch.run(resolution=args.resolution,
                           steam_flags=args.steam_flags,
                           close_steam_first=not args.keep_steam,
-                          print_only=args.print_only)
+                          print_only=args.print_only,
+                          steamos=args.steamos)
     except KeyboardInterrupt:
         print("\nsteam-console: interrupted", file=sys.stderr)
         return 130

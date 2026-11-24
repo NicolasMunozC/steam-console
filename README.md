@@ -35,13 +35,51 @@ exactly how it behaves in plain desktop Big Picture.
 
 ## Install
 
+One command. No pip, no virtualenv, no build step — it copies three modules into
+`~/.local/share/steam-console` and puts `steam-console` in `~/.local/bin`:
+
 ```console
-$ python3 -m venv .venv
-$ .venv/bin/pip install -e .
-$ .venv/bin/steam-console --print-only
+$ curl -fsSL https://raw.githubusercontent.com/NicolasMunozC/steam-console/main/install.sh | sh
 ```
 
-`steam-console` and `consola-steam` are the same command.
+From a clone it is the same thing:
+
+```console
+$ ./install.sh
+```
+
+Then:
+
+```console
+$ steam-console
+```
+
+`steam-console` and `consola-steam` are the same command, and the installer adds
+a **Steam Console (Consola Steam)** entry to your application menu.
+
+| Option | Effect |
+|---|---|
+| `--prefix DIR` | install under `DIR` instead of `~/.local` |
+| `--no-desktop` | skip the menu entry |
+| `--dry-run` | print what it would do |
+| `--uninstall` | remove the modules, the launchers and the menu entry |
+
+Nothing is compiled and nothing is downloaded at runtime: the program is Python
+standard library plus the `gamescope` and `steam` already on your machine. The
+installer only warns when those two are missing.
+
+### Other installs
+
+```console
+$ pipx install git+https://github.com/NicolasMunozC/steam-console
+```
+
+For working on the code, use the project's own environment:
+
+```console
+$ python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"
+$ .venv/bin/python -m pytest -q
+```
 
 ## Usage
 

@@ -21,9 +21,13 @@ def build_parser() -> argparse.ArgumentParser:
                         "monitor's current mode)")
     p.add_argument("--steam-flags", default=STEAM_FLAGS, metavar="FLAGS",
                    help=f"Steam launch flags (default: {STEAM_FLAGS})")
-    p.add_argument("--steamos", action="store_true",
-                   help="run Steam as a Deck: the power menu's 'Switch to "
-                        "desktop' works, and Steam powers Bluetooth off")
+    p.add_argument("--steamos", action=argparse.BooleanOptionalAction,
+                   default=True,
+                   help="run Steam as a SteamOS Deck (default): the power "
+                        "menu's 'Switch to desktop' closes the session; a first "
+                        "run may power Bluetooth off while Steam configures "
+                        "controllers. --no-steamos keeps Bluetooth and leaves "
+                        "that menu entry dead")
     p.add_argument("--keep-steam", action="store_true",
                    help="do not close Steam first (it must not be running)")
     p.add_argument("--print-only", action="store_true",

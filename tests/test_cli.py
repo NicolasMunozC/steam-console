@@ -11,7 +11,7 @@ def test_defaults_mean_the_monitor_and_big_picture():
     # No --resolution: read the monitor. No --steam-flags: Big Picture.
     assert args.resolution is None
     assert args.steam_flags == "-gamepadui"
-    assert args.steamos is False
+    assert args.steamos is True      # Deck mode: the power menu's exit
     assert args.keep_steam is False
     assert args.print_only is False
 
@@ -21,13 +21,13 @@ def test_flags_reach_the_launcher_as_keywords(monkeypatch):
     monkeypatch.setattr(cli.launch, "run", lambda **kwargs: seen.update(kwargs) or 0)
 
     assert cli.main(["--resolution", "1920x1080@60", "--keep-steam",
-                     "--print-only", "--steamos"]) == 0
+                     "--print-only", "--no-steamos"]) == 0
     assert seen == {
         "resolution": "1920x1080@60",
         "steam_flags": "-gamepadui",
         "close_steam_first": False,
         "print_only": True,
-        "steamos": True,
+        "steamos": False,
     }
 
 

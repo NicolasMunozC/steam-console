@@ -36,9 +36,9 @@ from collections.abc import Callable
 from .display import ConsoleError, DisplayMode, detect_display, resolve_display
 
 #: The client a podstage streaming session shows (its ``PS_STEAM_FLAGS``):
-#: Big Picture, gamepad-first, no desktop UI. ``-steamos3`` is *not* here: it is
-#: what ``--steamos`` adds, because it makes Steam believe it is a Deck and power
-#: the Bluetooth radio off.
+#: Big Picture, gamepad-first, no desktop UI. ``-steamos3`` is added on top by
+#: :func:`gamescope_argv` unless the caller opts out: it is what makes Steam
+#: answer the power menu's "Switch to desktop".
 STEAM_FLAGS = "-gamepadui"
 
 #: How long a graceful ``steam -shutdown`` gets before gamescope opens anyway.
@@ -60,7 +60,7 @@ exec steam -shutdown
 
 def gamescope_argv(mode: DisplayMode, backend: str,
                    steam_flags: str = STEAM_FLAGS,
-                   *, steamos: bool = False) -> list[str]:
+                   *, steamos: bool = True) -> list[str]:
     """The fullscreen gamescope that runs the desktop Steam in Big Picture.
 
     The tail of this list mirrors podstage's ``containers/runtime/runner.sh``
@@ -72,8 +72,8 @@ def gamescope_argv(mode: DisplayMode, backend: str,
     overlay is just another window and lands *below* a fullscreen game.
     """
     flags = steam_flags.split()
-    if steamos and "-steamos3" not in flags:   # the power menu's exit needs it,
-        flags.insert(0, "-steamos3")           # and it costs the Bluetooth radio
+    if steamos and "-steamos3" not in flags:   # Steam answers the power menu's
+        flags.insert(0, "-steamos3")           # exit only in Deck mode
     size = str(mode.width), str(mode.height)
     return [
         "gamescope", "--backend", backend,
@@ -173,13 +173,15 @@ def launch(argv: list[str], env: dict[str, str] | None = None) -> int:
 
 def run(*, resolution: str | None = None, steam_flags: str = STEAM_FLAGS,
         close_steam_first: bool = True, print_only: bool = False,
-        steamos: bool = False,
+        steamos: bool = True,
         launch_fn: Callable[[list[str]], int] | None = None,
         detect: Callable[[], DisplayMode | None] | None = None) -> int:
     """Open the console session. Returns a process exit code.
 
-    ``steamos`` trades the Bluetooth radio for the power menu's exit: it adds
-    ``-steamos3``, without which Steam never calls the session-select helper.
+    ``steamos`` is the default because it is the only mode with an exit in the
+    power menu: it adds ``-steamos3``, without which Steam never calls the
+    session-select helper. Opting out keeps the Bluetooth radio untouched and
+    leaves that menu entry dead.
     """
     for tool in ("gamescope", "steam"):
         if shutil.which(tool) is None:
@@ -224,9 +226,12 @@ def run(*, resolution: str | None = None, steam_flags: str = STEAM_FLAGS,
 
     if steamos:
         print("  exit: the power menu's “Switch to desktop”, or Ctrl+C here")
-        print("  (SteamOS mode: Steam powers Bluetooth off in this session)")
+        print("  (on a first Deck-mode run Steam may power Bluetooth off while "
+              "it configures controllers)")
     else:
         print("  exit: close Big Picture, or Ctrl+C here")
+        print("  (--no-steamos: the power menu's “Switch to desktop” does "
+              "nothing here)")
     try:
         # An injected launcher keeps its one-argument contract.
         if launch_fn is not None:

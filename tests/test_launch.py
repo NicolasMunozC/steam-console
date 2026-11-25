@@ -29,18 +29,18 @@ def test_gamescope_matches_the_monitor_mode_on_both_sides():
         "-W", "3440", "-H", "1440", "-w", "3440", "-h", "1440",
         "-r", "180", "-C", "3000", "--expose-wayland",
         "--force-windows-fullscreen", "-e",
-        "-f", "--", "steam", "-gamepadui",
+        "-f", "--", "steam", "-steamos3", "-gamepadui",
     ]
 
 
-def test_steamos_mode_is_opt_in_and_adds_the_deck_flag():
-    """-steamos3 is the power menu's exit and also what makes Steam power the
-    Bluetooth radio off, so it only comes when asked for."""
-    plain = launch.gamescope_argv(MODE, "wayland")
-    deck = launch.gamescope_argv(MODE, "wayland", steamos=True)
+def test_deck_mode_is_the_default_and_can_be_opted_out():
+    """-steamos3 is the only thing that makes Steam answer the power menu's
+    "Switch to desktop", so it is on unless asked otherwise."""
+    deck = launch.gamescope_argv(MODE, "wayland")
+    plain = launch.gamescope_argv(MODE, "wayland", steamos=False)
 
-    assert plain[-2:] == ["steam", "-gamepadui"]
     assert deck[-3:] == ["steam", "-steamos3", "-gamepadui"]
+    assert plain[-2:] == ["steam", "-gamepadui"]
 
 
 def test_gamescope_keeps_the_session_stack_flags():
@@ -58,12 +58,12 @@ def test_gamescope_keeps_the_session_stack_flags():
 def test_steam_runs_in_big_picture_like_the_streamed_session():
     argv = launch.gamescope_argv(MODE, "x11", "-gamepadui -noreactlogin")
 
-    assert argv[-3:] == ["steam", "-gamepadui", "-noreactlogin"]
+    # Custom flags get -steamos3 too, or the power menu's exit would hang.
+    assert argv[-4:] == ["steam", "-steamos3", "-gamepadui", "-noreactlogin"]
     assert launch.STEAM_FLAGS == "-gamepadui"
-    # Asked for SteamOS mode, custom flags get it too, or the exit would hang.
-    deck = launch.gamescope_argv(MODE, "x11", "-gamepadui -noreactlogin",
-                                 steamos=True)
-    assert deck[-4:] == ["steam", "-steamos3", "-gamepadui", "-noreactlogin"]
+    plain = launch.gamescope_argv(MODE, "x11", "-gamepadui -noreactlogin",
+                                  steamos=False)
+    assert plain[-3:] == ["steam", "-gamepadui", "-noreactlogin"]
 
 
 @pytest.mark.parametrize("wayland,expected", [(None, "x11"), ("wayland-1", "wayland")])
@@ -179,29 +179,29 @@ def test_print_only_shows_the_command_and_touches_nothing(monkeypatch, capsys):
     out, err = capsys.readouterr()
     # stdout stays one command line: a wrapper may read it as the command.
     assert out.splitlines()[-1].startswith("gamescope") and "-W 1920" in out
-    # Nothing about a helper nobody will get: SteamOS mode is off by default.
-    assert launch.SESSION_SELECT not in err
+    # The helper comes with Deck mode, which is now the default.
+    assert launch.SESSION_SELECT in err
 
 
-def test_the_preview_mentions_the_helper_in_steamos_mode(monkeypatch, capsys):
+def test_the_preview_is_silent_about_the_helper_without_deck_mode(monkeypatch, capsys):
     prepare(monkeypatch)
 
-    assert launch.run(print_only=True, steamos=True) == 0
-    assert launch.SESSION_SELECT in capsys.readouterr().err
+    assert launch.run(print_only=True, steamos=False) == 0
+    assert launch.SESSION_SELECT not in capsys.readouterr().err
 
 
-def test_the_default_session_needs_no_temporary_directory(monkeypatch):
-    """Without --steamos there is no helper to prepare, so a machine with an
-    unwritable or noexec temporary directory still gets its console."""
+def test_no_steamos_needs_no_temporary_directory(monkeypatch):
+    """Opting out means no helper, so a machine with an unwritable or noexec
+    temporary directory still gets its console."""
     prepare(monkeypatch)
     monkeypatch.setattr(launch, "prepare_session_select",
-                        lambda: pytest.fail("no helper is needed by default"))
+                        lambda: pytest.fail("no helper is needed"))
     monkeypatch.setattr(launch, "close_steam", lambda timeout=20: True)
     seen = []
     monkeypatch.setattr(launch, "launch",
                         lambda argv, env=None: seen.append(env) or 0)
 
-    assert launch.run() == 0
+    assert launch.run(steamos=False) == 0
     assert seen == [None]
 
 
